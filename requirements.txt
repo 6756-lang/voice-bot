@@ -2,4 +2,4 @@ flask
 openai
 gtts
 speechrecognition
-pyaudio
+pydub
