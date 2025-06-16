@@ -2,9 +2,50 @@
 <html>
 <head>
   <title>ChatGPT Voice Bot</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    button { padding: 12px 24px; font-size: 16px; margin-top: 20px; }
+    #result { margin-top: 30px; font-size: 18px; }
+  </style>
 </head>
 <body>
-  <h1>🎤 ChatGPT Voice Bot is Live!</h1>
-  <p>This is a placeholder homepage. Voice input happens via the /ask endpoint.</p>
+  <h1>🎤 ChatGPT Voice Bot</h1>
+  <button onclick="recordAudio()">Click to Ask a Question</button>
+  <div id="result">
+    <p id="question"></p>
+    <p id="response"></p>
+    <audio id="audio" controls style="margin-top: 20px;"></audio>
+  </div>
+
+  <script>
+    async function recordAudio() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const audioChunks = [];
+
+      recorder.ondataavailable = event => audioChunks.push(event.data);
+
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'input.wav');
+
+        const res = await fetch('/ask', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+        document.getElementById("question").innerText = "You asked: " + data.user_text;
+        document.getElementById("response").innerText = "ChatGPT said: " + data.bot_reply;
+        const audio = document.getElementById("audio");
+        audio.src = data.audio_url;
+        audio.play();
+      };
+
+      recorder.start();
+      setTimeout(() => recorder.stop(), 5000); // Record for 5 seconds
+    }
+  </script>
 </body>
 </html>
