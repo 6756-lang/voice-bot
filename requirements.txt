@@ -1,0 +1,5 @@
+flask
+openai
+gtts
+speechrecognition
+pyaudio
