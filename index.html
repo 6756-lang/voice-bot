@@ -35,6 +35,10 @@
         document.getElementById("answer").textContent = "ChatGPT: " + data.bot_reply;
         document.getElementById("audio").src = data.audio_url;
         document.getElementById("audio").play();
+        const downloadLink = document.getElementById("downloadLink");
+downloadLink.href = data.audio_url;
+downloadLink.style.display = "inline";
+
       };
 
       recorder.start();
