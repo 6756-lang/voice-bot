@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ChatGPT Voice Bot</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🎙️ ChatGPT Voice Bot</h1>
+  <button onclick="recordAudio()">Ask Your Question</button>
+  <p id="question"></p>
+  <p id="answer"></p>
+  <audio id="audio" controls style="margin-top: 20px;"></audio>
+
+  <script>
+    async function recordAudio() {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks = [];
+
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: 'audio/wav' });
+        const formData = new FormData();
+        formData.append("audio", blob, "recording.wav");
+
+        const res = await fetch("/ask", { method: "POST", body: formData });
+        const data = await res.json();
+
+        document.getElementById("question").textContent = "You asked: " + data.user_text;
+        document.getElementById("answer").textContent = "ChatGPT: " + data.bot_reply;
+        document.getElementById("audio").src = data.audio_url;
+        document.getElementById("audio").play();
+      };
+
+      recorder.start();
+      setTimeout(() => recorder.stop(), 5000);
+    }
+  </script>
+</body>
+</html>
